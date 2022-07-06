@@ -1,0 +1,16 @@
+- hosts: pawns
+  gather_facts: yes
+  vars:
+    vpn_pin: "{{ lookup('env','PAWNS_PIN') }}"
+  tasks:
+   
+  - name: Update & Upgrade packages
+    become: true
+    become_user: root
+    apt:
+      upgrade: yes
+      update_cache: yes
+       
+  - name: VPN Client Installation & Configuration
+    import_role: 
+      name: vpn-client

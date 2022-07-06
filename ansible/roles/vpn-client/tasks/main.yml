@@ -1,0 +1,11 @@
+---
+# tasks file for vpn-client
+- name: Validate architecture
+  become: true
+  become_user: root
+  shell: dpkg --print-architecture
+  register: machine_architecture
+
+- name: Run pawns tasks
+  import_tasks: pawns.yml
+  when: machine_architecture.stdout == "arm64" and ansible_facts['distribution'] == "Debian"

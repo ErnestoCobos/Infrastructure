@@ -1,0 +1,35 @@
+- name: install OpenVPN
+  apt:
+    name: openvpn
+    state: latest
+
+- name: Stop OpenVPN service
+  become: true
+  become_user: root
+  service:
+    name: openvpn
+    state: stopped
+
+
+- name: Config OpenVPN client
+  become: true
+  become_user: root
+  copy:
+    src: "{{  inventory_hostname.split('.')[0] }}.conf"
+    dest: "/etc/openvpn/server.conf"
+
+- name: Adding VPN credentials
+  become: true
+  become_user: root
+  copy:
+    dest: "/etc/openvpn/pass.txt"
+    content: |
+      {{  inventory_hostname.split('.')[0] }}
+      {{ vpn_pin }}
+
+- name: Start OpenVPN service
+  become: true
+  become_user: root
+  service:
+    name: openvpn
+    state: started
