@@ -33,6 +33,12 @@ variable "vercel_environment_variables" {
   default     = {}
 }
 
+variable "primary_domains" {
+  description = "Canonical primary domains that generate Vercel domains and Cloudflare DNS."
+  type        = any
+  default     = {}
+}
+
 variable "vercel_domains" {
   description = "Vercel domains."
   type        = any

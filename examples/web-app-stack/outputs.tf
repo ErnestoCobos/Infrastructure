@@ -7,6 +7,10 @@ output "supabase_project" {
   sensitive = true
 }
 
+output "primary_domains" {
+  value = module.web_app_stack.primary_domains
+}
+
 output "vercel_domains" {
   value = module.web_app_stack.vercel_domains
 }

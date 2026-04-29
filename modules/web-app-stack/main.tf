@@ -79,6 +79,56 @@ locals {
     var.vercel_environment_variables,
     local.generated_vercel_environment_variables
   )
+
+  primary_domain_vercel_domains = merge(
+    {
+      for key, domain in var.primary_domains : "${key}-apex" => {
+        domain               = domain.apex_domain
+        redirect             = try(domain.redirect_apex_to_canonical, true) ? coalesce(try(domain.canonical_domain, null), "www.${domain.apex_domain}") : null
+        redirect_status_code = try(domain.redirect_apex_to_canonical, true) ? try(domain.redirect_status_code, 308) : null
+      }
+    },
+    {
+      for key, domain in var.primary_domains : "${key}-canonical" => {
+        domain = coalesce(try(domain.canonical_domain, null), "www.${domain.apex_domain}")
+      }
+    }
+  )
+
+  primary_domain_cloudflare_dns_records = merge(
+    {
+      for key, domain in var.primary_domains : "${key}-apex" => {
+        zone_id = domain.zone_id
+        name    = domain.apex_domain
+        type    = "A"
+        content = try(domain.apex_record_content, "76.76.21.21")
+        ttl     = try(domain.ttl, 1)
+        proxied = try(domain.proxied, false)
+        comment = "Primary apex domain for Terraform stack ${var.stack_name}"
+      }
+    },
+    {
+      for key, domain in var.primary_domains : "${key}-canonical" => {
+        zone_id = domain.zone_id
+        name    = coalesce(try(domain.canonical_domain, null), "www.${domain.apex_domain}")
+        type    = "CNAME"
+        content = try(domain.canonical_record_content, "cname.vercel-dns.com")
+        ttl     = try(domain.ttl, 1)
+        proxied = try(domain.proxied, false)
+        comment = "Primary canonical domain for Terraform stack ${var.stack_name}"
+      }
+    }
+  )
+
+  vercel_domains = merge(
+    local.primary_domain_vercel_domains,
+    var.vercel_domains
+  )
+
+  cloudflare_dns_records = merge(
+    local.primary_domain_cloudflare_dns_records,
+    var.cloudflare_dns_records
+  )
 }
 
 resource "vercel_project" "this" {
@@ -157,7 +207,7 @@ resource "vercel_project_environment_variable" "this" {
 }
 
 resource "vercel_project_domain" "this" {
-  for_each = var.vercel_domains
+  for_each = local.vercel_domains
 
   project_id            = vercel_project.this.id
   team_id               = local.vercel_team_id
@@ -169,7 +219,7 @@ resource "vercel_project_domain" "this" {
 }
 
 resource "cloudflare_dns_record" "this" {
-  for_each = var.cloudflare_dns_records
+  for_each = local.cloudflare_dns_records
 
   zone_id  = each.value.zone_id
   name     = each.value.name

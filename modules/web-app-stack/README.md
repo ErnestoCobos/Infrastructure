@@ -6,6 +6,7 @@ Opinionated web app stack module for:
 - Supabase project
 - optional Vercel project domains
 - optional Cloudflare DNS records for those domains
+- optional primary domain pairs with apex-to-`www` redirect
 - optional Supabase values injected into Vercel environment variables
 
 The module is designed for local-first Terraform execution with secrets loaded through 1Password.
@@ -64,11 +65,32 @@ module "web_app_stack" {
 
 ## Domain Wiring
 
+Use `primary_domains` for the common production shape:
+
+```hcl
+primary_domains = {
+  cobos_io = {
+    zone_id                    = "REPLACE_WITH_COBOS_IO_ZONE_ID"
+    apex_domain                = "cobos.io"
+    canonical_domain           = "www.cobos.io"
+    redirect_apex_to_canonical = true
+    proxied                    = false
+  }
+}
+```
+
+That generates:
+
+- Vercel domain `www.cobos.io`
+- Vercel domain `cobos.io` redirecting to `www.cobos.io`
+- Cloudflare `A` record for `cobos.io` to `76.76.21.21`
+- Cloudflare `CNAME` record for `www.cobos.io` to `cname.vercel-dns.com`
+
 For an apex domain on Vercel, point Cloudflare to `76.76.21.21`.
 
 For a subdomain, point Cloudflare to `cname.vercel-dns.com`.
 
-Example:
+Use `vercel_domains` and `cloudflare_dns_records` for additional domains or custom records:
 
 ```hcl
 vercel_domains = {
@@ -90,6 +112,7 @@ cloudflare_dns_records = {
 
 ## Safety Defaults
 
+- Apex domains redirect to the canonical domain when `redirect_apex_to_canonical = true`.
 - Supabase publishable keys are preferred for generated Vercel environment variables.
 - Supabase legacy anon and service role keys are not injected into Vercel by default.
 - Cloudflare Tunnel is out of scope.

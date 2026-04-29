@@ -34,18 +34,18 @@ supabase_to_vercel = {
   targets                 = ["production", "preview"]
 }
 
-vercel_domains = {
-  app = {
-    domain = "example-app.example.com"
+primary_domains = {
+  example = {
+    zone_id                    = "REPLACE_WITH_CLOUDFLARE_ZONE_ID"
+    apex_domain                = "example.com"
+    canonical_domain           = "www.example.com"
+    redirect_apex_to_canonical = true
+    proxied                    = false
   }
 }
 
-cloudflare_dns_records = {
+vercel_domains = {
   app = {
-    zone_id = "REPLACE_WITH_CLOUDFLARE_ZONE_ID"
-    name    = "example-app.example.com"
-    type    = "CNAME"
-    content = "cname.vercel-dns.com"
-    proxied = false
+    domain = "app.example.com"
   }
 }

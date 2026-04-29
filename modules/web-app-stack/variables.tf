@@ -70,6 +70,22 @@ variable "vercel_environment_variables" {
   default = {}
 }
 
+variable "primary_domains" {
+  description = "Canonical domain pairs for the app. Generates Vercel domains plus Cloudflare DNS records, including optional apex-to-canonical redirects."
+  type = map(object({
+    zone_id                    = string
+    apex_domain                = string
+    canonical_domain           = optional(string)
+    redirect_apex_to_canonical = optional(bool, true)
+    redirect_status_code       = optional(number, 308)
+    ttl                        = optional(number, 1)
+    proxied                    = optional(bool, false)
+    apex_record_content        = optional(string, "76.76.21.21")
+    canonical_record_content   = optional(string, "cname.vercel-dns.com")
+  }))
+  default = {}
+}
+
 variable "vercel_domains" {
   description = "Vercel domains to attach to the project."
   type = map(object({

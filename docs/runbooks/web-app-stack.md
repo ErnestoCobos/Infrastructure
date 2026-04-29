@@ -10,6 +10,7 @@ It can create:
 - Vercel environment variables generated from Supabase
 - Vercel project domains
 - Cloudflare DNS records for those domains
+- primary apex/canonical domain pairs, such as `cobos.io` redirecting to `www.cobos.io`
 
 ## Required Tokens
 
@@ -46,6 +47,21 @@ Supabase project creation is different: the Supabase provider requires `database
 
 - Apex on Vercel: Cloudflare `A` record to `76.76.21.21`.
 - Subdomain on Vercel: Cloudflare `CNAME` to `cname.vercel-dns.com`.
+- Prefer `primary_domains` for production domains. Set `redirect_apex_to_canonical = true` when the apex should redirect to `www`.
+
+Example:
+
+```hcl
+primary_domains = {
+  cobos_io = {
+    zone_id                    = "REPLACE_WITH_COBOS_IO_ZONE_ID"
+    apex_domain                = "cobos.io"
+    canonical_domain           = "www.cobos.io"
+    redirect_apex_to_canonical = true
+    proxied                    = false
+  }
+}
+```
 
 ## What This Module Does Not Do
 

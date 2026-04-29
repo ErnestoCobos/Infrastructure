@@ -7,6 +7,7 @@ This example shows how to create a full web app stack with:
 - Vercel environment variables generated from Supabase
 - optional Vercel domain
 - optional Cloudflare DNS
+- primary apex-to-canonical domain wiring
 
 Use this as a template or validation target. For a real stack, copy the shape into `projects/<org>/<stack>` with HCP Terraform remote state instead of applying this example directly with local state.
 

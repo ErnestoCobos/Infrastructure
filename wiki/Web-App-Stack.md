@@ -7,6 +7,7 @@ The `modules/web-app-stack` module creates a reusable app stack:
 - Vercel environment variables wired from Supabase.
 - Vercel domains.
 - Cloudflare DNS.
+- Primary domain pairs such as `cobos.io` redirecting to `www.cobos.io`.
 
 ## Providers
 
@@ -23,6 +24,7 @@ CLOUDFLARE_API_TOKEN=op://Infrastructure/Cloudflare/CLOUDFLARE_API_TOKEN
 - Uses Terraform `value_wo` for Vercel environment variable values.
 - Requires Terraform `>= 1.11`.
 - Supabase `database_password` is sensitive, but the provider can still place it in Terraform state; use HCP Terraform remote state for real stacks.
+- `primary_domains` can attach apex/canonical domains and redirect apex to `www`.
 - Does not include Cloudflare Tunnel.
 - Does not inject Supabase service role keys unless explicitly enabled.
 

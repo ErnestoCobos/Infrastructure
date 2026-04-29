@@ -48,6 +48,7 @@ module "web_app_stack" {
   supabase_project             = local.supabase_project
   supabase_to_vercel           = var.supabase_to_vercel
   vercel_environment_variables = var.vercel_environment_variables
+  primary_domains              = var.primary_domains
   vercel_domains               = var.vercel_domains
   cloudflare_dns_records       = var.cloudflare_dns_records
 }
