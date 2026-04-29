@@ -13,11 +13,14 @@ Terraform is organized as local-first project roots:
 
 Each root uses HCP Terraform for state and points to `modules/cloudflare-zones` for Cloudflare zone and DNS record management.
 
+For app stacks, use `modules/web-app-stack` to combine Vercel, Supabase, and optional Cloudflare DNS.
+
 ## Guardrails
 
 - Do not commit secrets, real local `.tfvars`, Terraform state, or generated plans.
 - Do not introduce Cloudflare Tunnel resources.
 - Do not replace the local-first workflow with hosted CI.
+- Do not put Vercel or Supabase tokens in Terraform files; use `VERCEL_API_TOKEN` and `SUPABASE_ACCESS_TOKEN` through 1Password.
 - Keep changes small and directly tied to the requested infrastructure surface.
 - Use Spanish for user-facing docs when possible.
 

@@ -7,6 +7,7 @@ This repository manages personal and company infrastructure. Treat every change 
 - Terraform is local-first. Do not add GitHub Actions, hosted CI, or automatic remote applies for Terraform unless Ernesto explicitly asks for that.
 - HCP Terraform is used for remote state and workspace history. The intended execution mode is local execution from Ernesto's machine.
 - Cloudflare is currently limited to zones and DNS records. Do not add Cloudflare Tunnel, Zero Trust, Workers, WAF, or Pages resources unless explicitly requested.
+- Vercel and Supabase app stacks belong in `modules/web-app-stack`; keep them local-first and 1Password-backed.
 - Keep real secrets out of git. Use 1Password references and `op run` for tokens.
 - This repo is public unless GitHub visibility is changed; do not commit private DNS targets, API tokens, account tokens, SSH keys, or generated state.
 

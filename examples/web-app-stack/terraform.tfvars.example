@@ -1,0 +1,51 @@
+stack_name = "example-app"
+
+# Do not put the Supabase database password in terraform.tfvars.
+# Load it with TF_VAR_supabase_database_password through .env.1password instead.
+
+vercel_project = {
+  name      = "example-app"
+  framework = "nextjs"
+
+  # Optional: set when creating in a Vercel team.
+  # team_id = "team_xxxxxxxxxxxxxxxxxxxxxxxx"
+
+  git_repository = {
+    type              = "github"
+    repo              = "ErnestoCobos/example-app"
+    production_branch = "main"
+  }
+}
+
+supabase_project = {
+  organization_id   = "REPLACE_WITH_SUPABASE_ORG_ID"
+  name              = "example-app"
+  region            = "us-east-1"
+  instance_size     = "micro"
+
+  auth_settings = {
+    site_url = "https://example-app.example.com"
+  }
+}
+
+supabase_to_vercel = {
+  enabled                 = true
+  include_publishable_key = true
+  targets                 = ["production", "preview"]
+}
+
+vercel_domains = {
+  app = {
+    domain = "example-app.example.com"
+  }
+}
+
+cloudflare_dns_records = {
+  app = {
+    zone_id = "REPLACE_WITH_CLOUDFLARE_ZONE_ID"
+    name    = "example-app.example.com"
+    type    = "CNAME"
+    content = "cname.vercel-dns.com"
+    proxied = false
+  }
+}

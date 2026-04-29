@@ -41,6 +41,11 @@ install_formula tflint
 install_formula terraform-docs
 install_formula checkov
 install_formula hashicorp/tap/terraform
+install_formula vercel-cli
+
+echo "Ensuring Supabase tap exists..."
+brew tap supabase/tap
+install_formula supabase/tap/supabase
 
 if ! command -v op >/dev/null 2>&1; then
   echo "Installing 1Password CLI..."

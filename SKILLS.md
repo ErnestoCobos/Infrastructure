@@ -65,3 +65,16 @@ git@github.com:ErnestoCobos/Infrastructure.wiki.git
 ```
 
 If GitHub returns `Repository not found`, create the first wiki page from the GitHub web UI while signed in. GitHub only exposes the `.wiki.git` remote after that first page exists.
+
+## Web App Stack
+
+Use `modules/web-app-stack` when the request is to provision a build-web-app style stack.
+
+The module can manage:
+
+- Vercel project and domains.
+- Supabase project and settings.
+- Supabase-generated Vercel environment variables.
+- Cloudflare DNS for Vercel domains.
+
+Do not inject Supabase service role keys into Vercel unless the stack explicitly needs server-only admin operations and the user approves that risk.

@@ -9,7 +9,8 @@ La prioridad actual es Terraform para manejar zonas y DNS en Cloudflare sin subi
 ```text
 .
 ├── modules/
-│   └── cloudflare-zones/        # Modulo reutilizable para zonas y DNS
+│   ├── cloudflare-zones/        # Modulo reutilizable para zonas y DNS
+│   └── web-app-stack/           # Stack Vercel + Supabase + Cloudflare DNS
 ├── projects/
 │   ├── cobosio/cobos-io/        # Org HCP cobosio, proyecto cobos.io
 │   └── voltaflow/
@@ -19,6 +20,7 @@ La prioridad actual es Terraform para manejar zonas y DNS en Cloudflare sin subi
 ├── scripts/
 │   ├── bootstrap-macos.sh       # Prerrequisitos para macOS
 │   └── tf-local.sh              # Wrapper local con 1Password
+├── examples/web-app-stack/      # Ejemplo de stack web
 ├── wiki/                        # Fuente para GitHub Wiki
 ├── ansible/                     # Automatizacion existente de servidores
 ├── AGENTS.md
@@ -36,6 +38,7 @@ La prioridad actual es Terraform para manejar zonas y DNS en Cloudflare sin subi
 - Cloudflare por ahora solo zonas y DNS.
 - Cloudflare Tunnel queda fuera.
 - Un workspace por proyecto para reducir blast radius. No mezclar Cobos.io y Voltaflow en el mismo state.
+- Web app stacks se modelan con `modules/web-app-stack`: Vercel, Supabase, variables de entorno y DNS.
 
 ## Prerrequisitos macOS
 
@@ -58,6 +61,8 @@ Variables esperadas:
 ```dotenv
 CLOUDFLARE_API_TOKEN=op://Infrastructure/Cloudflare/CLOUDFLARE_API_TOKEN
 TF_TOKEN_app_terraform_io=op://Infrastructure/HCP Terraform/TF_TOKEN_app_terraform_io
+VERCEL_API_TOKEN=op://Infrastructure/Vercel/VERCEL_API_TOKEN
+SUPABASE_ACCESS_TOKEN=op://Infrastructure/Supabase/SUPABASE_ACCESS_TOKEN
 ```
 
 ## Uso
@@ -91,6 +96,8 @@ Apply manual:
 ```bash
 make apply PROJECT=cobosio/cobos-io
 ```
+
+`plan` y `apply` requieren `.env.1password` por defecto. Si intencionalmente quieres usar credenciales ya exportadas en el ambiente, usa `ALLOW_AMBIENT_CREDENTIALS=1`.
 
 Validar todos:
 
@@ -143,6 +150,17 @@ docs/diagrams/cloudflare-platform.mmd
 
 Tambien esta incluido en `wiki/Portfolio-Diagram.md` para GitHub Wiki.
 
+## Web App Stack
+
+Para crear un stack tipo web app usa:
+
+```text
+modules/web-app-stack
+examples/web-app-stack
+```
+
+Este modulo crea el proyecto en Vercel, el proyecto en Supabase, inyecta variables de Supabase en Vercel usando `value_wo`, y puede agregar dominios/DNS en Cloudflare.
+
 ## GitHub Wiki
 
 La fuente del wiki vive en `wiki/`. Para publicarlo:
@@ -164,6 +182,8 @@ git -C /tmp/infra-wiki push
 - [Terraform cloud block](https://developer.hashicorp.com/terraform/language/block/terraform#cloud)
 - [Cloudflare Terraform zones](https://developers.cloudflare.com/api/terraform/resources/zones/)
 - [Cloudflare Terraform DNS records](https://developers.cloudflare.com/api/terraform/resources/dns/subresources/records/)
+- [Vercel Terraform provider](https://vercel.com/kb/guide/integrating-terraform-with-vercel)
+- [Supabase Terraform provider](https://supabase.com/docs/guides/deployment/terraform)
 - [1Password CLI secret environments](https://developer.1password.com/docs/cli/secrets-environment-variables/)
 
 ## Ansible existente

@@ -16,4 +16,5 @@ Core pages:
 - [Cloudflare Zones](Cloudflare-Zones)
 - [OnePassword Secrets](OnePassword-Secrets)
 - [Mac Prerequisites](Mac-Prerequisites)
+- [Web App Stack](Web-App-Stack)
 - [Portfolio Diagram](Portfolio-Diagram)
