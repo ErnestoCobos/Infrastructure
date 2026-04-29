@@ -1,0 +1,33 @@
+# Portfolio Diagram
+
+Use this Mermaid diagram in the portfolio renderer.
+
+```mermaid
+flowchart LR
+  Local["Local Mac<br/>Makefile + Terraform CLI"] --> OP["1Password CLI<br/>op run"]
+  OP --> TF["Terraform roots<br/>projects/*"]
+  TF --> HCP["HCP Terraform<br/>remote state + history"]
+  TF --> Module["modules/cloudflare-zones"]
+
+  subgraph Cobos["HCP org: cobosio"]
+    CobosProject["Project: cobos.io"]
+    CobosWorkspace["Workspace: cobos-io-cloudflare-dns"]
+    CobosProject --> CobosWorkspace
+  end
+
+  subgraph Volta["HCP org: voltaflow"]
+    GetDecant["Project: getdecant<br/>Workspace: getdecant-cloudflare-dns"]
+    Voltaflow["Project: voltaflow<br/>Workspace: voltaflow-cloudflare-dns"]
+    Enkiflow["Project: enkiflow<br/>Workspace: enkiflow-cloudflare-dns"]
+  end
+
+  HCP --> Cobos
+  HCP --> Volta
+
+  Module --> CF["Cloudflare API"]
+  CF --> Zones["Zones"]
+  Zones --> DNS["DNS records"]
+  Zones --> NS["Assigned name servers"]
+
+  Tunnel["Cloudflare Tunnel<br/>out of scope"] -. excluded .- CF
+```

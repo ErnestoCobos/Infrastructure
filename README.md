@@ -1,122 +1,169 @@
 # Infrastructure
 
-Infrastructure as Code repository containing Ansible playbooks, Terraform modules, and automation workflows.
+Repositorio de infraestructura local-first para Cloudflare DNS, Terraform, HCP Terraform y Ansible.
 
-## 📁 Structure
+La prioridad actual es Terraform para manejar zonas y DNS en Cloudflare sin subir secretos al repo. El estado vive en HCP Terraform, pero los comandos se ejecutan desde la maquina local usando 1Password.
 
+## Arquitectura
+
+```text
+.
+├── modules/
+│   └── cloudflare-zones/        # Modulo reutilizable para zonas y DNS
+├── projects/
+│   ├── cobosio/cobos-io/        # Org HCP cobosio, proyecto cobos.io
+│   └── voltaflow/
+│       ├── getdecant/           # Org HCP voltaflow
+│       ├── voltaflow/
+│       └── enkiflow/
+├── scripts/
+│   ├── bootstrap-macos.sh       # Prerrequisitos para macOS
+│   └── tf-local.sh              # Wrapper local con 1Password
+├── wiki/                        # Fuente para GitHub Wiki
+├── ansible/                     # Automatizacion existente de servidores
+├── AGENTS.md
+├── CLAUDE.md
+├── SKILLS.md
+└── Makefile
 ```
-├── ansible/              # Ansible configuration and playbooks
-│   ├── inventory/        # Host inventory files
-│   ├── playbooks/        # Ansible playbooks
-│   ├── roles/            # Reusable roles
-│   └── requirements.yml  # Ansible Galaxy requirements
-├── terraform/            # Terraform modules (WIP)
-├── scripts/              # Utility scripts
-└── .github/workflows/    # GitHub Actions workflows
-```
 
-## 🚀 Quick Start
+## Decisiones
 
-### Prerequisites
+- Terraform oficial, no OpenTofu.
+- HCP Terraform para state remoto y trazabilidad.
+- Ejecucion local desde esta maquina. En HCP Terraform, configura los workspaces con execution mode local.
+- Secretos via 1Password CLI con `op run`.
+- Cloudflare por ahora solo zonas y DNS.
+- Cloudflare Tunnel queda fuera.
+- Un workspace por proyecto para reducir blast radius. No mezclar Cobos.io y Voltaflow en el mismo state.
 
-- [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) >= 2.15
-- [Tailscale](https://tailscale.com/) for secure network access
-- SSH key configured for target servers
+## Prerrequisitos macOS
 
-### Local Usage
+Instala las herramientas base:
 
 ```bash
-# Install Ansible collections
-cd ansible
-ansible-galaxy collection install -r requirements.yml
-
-# Run update check
-ansible-playbook playbooks/update.yml --check --diff
-
-# Apply updates
-ansible-playbook playbooks/update.yml
+./scripts/bootstrap-macos.sh
 ```
 
-### CLI Tool
+Luego prepara secretos locales:
 
 ```bash
-# Check for updates (smart mode)
-./scripts/server-update.sh smart
-
-# Only check what updates are available
-./scripts/server-update.sh check
-
-# Apply updates (may require approval if reboot/restart risk is detected)
-./scripts/server-update.sh apply
-
-# Apply updates with reboot
-./scripts/server-update.sh apply-reboot
-
-# Download logs from last run
-./scripts/server-update.sh logs
+cp .env.1password.example .env.1password
 ```
 
-Notes:
-- `apply-reboot` always goes through the `maintenance` approval gate.
-- `apply` may also require approval when `reboot_required=true` or `service_restart_required=true`.
+Edita `.env.1password` con referencias reales de 1Password, no valores planos.
 
-## 🔄 Automated Workflows
+Variables esperadas:
 
-### Server Updates (Weekly - Mondays 6am UTC)
+```dotenv
+CLOUDFLARE_API_TOKEN=op://Infrastructure/Cloudflare/CLOUDFLARE_API_TOKEN
+TF_TOKEN_app_terraform_io=op://Infrastructure/HCP Terraform/TF_TOKEN_app_terraform_io
+```
 
-The `server-updates.yml` workflow runs weekly (Monday 18:00 UTC / 12:00 PM CDMX) and is **check-only** on schedule:
-1. Connects to servers via Tailscale (MagicDNS)
-2. Checks for available updates
-3. Sends an email summary **every run** (including “no updates”)
+## Uso
 
-Applying updates is done via `workflow_dispatch` (manual trigger):
-- **Smart mode** applies automatically *only* when no reboot is required and no critical service restart risk is detected.
-- If a reboot or critical service restart risk is detected, updates require manual approval (GitHub Environment `maintenance`).
+Revisar ambiente:
 
-#### Execution Modes
+```bash
+make doctor
+```
 
-| Mode | Description |
-|------|-------------|
-| `smart` | Check first. Apply only if no reboot and no critical restart risk (default) |
-| `check` | Only check what updates are available |
-| `apply` | Apply updates (approval required if reboot/restart risk is detected) |
-| `apply-reboot` | Apply updates AND reboot if needed (always approval required) |
+Formatear Terraform:
 
-#### Critical Restart Risk (Heuristic)
+```bash
+make fmt
+```
 
-During the check, the workflow flags `service_restart_required=true` when upgradable packages match critical patterns.
-Minimum set:
-- OpenSSH (`openssh-server`, `openssh-client`, `openssh-sftp-server`)
-- Java 17 (SonarQube dependency: `openjdk-17-*`, `java-common`, `ca-certificates-java`)
-- Tailscale (`tailscale`)
+Validar un proyecto:
 
-## 🔐 Required Secrets
+```bash
+make validate PROJECT=cobosio/cobos-io
+```
 
-Configure these in GitHub repository settings:
+Plan:
 
-| Secret | Description |
-|--------|-------------|
-| `SSH_PRIVATE_KEY` | SSH private key for server access |
-| `TS_OAUTH_CLIENT_ID` | Tailscale OAuth client ID |
-| `TS_OAUTH_SECRET` | Tailscale OAuth secret |
-| `RESEND_API_KEY` | (Optional) Resend API key for email notifications |
-| `GEMINI_API_KEY` | (Optional) Google Gemini API key for email generation |
-| `EMAIL_FROM` | (Optional) Sender email address |
-| `NOTIFY_EMAIL` | (Optional) Recipient email address |
+```bash
+make plan PROJECT=cobosio/cobos-io
+```
 
-### Manual Approval (Recommended)
+Apply manual:
 
-Configure a GitHub Environment named `maintenance` with **required reviewers**.
-The workflow uses it to gate disruptive applies (reboot or critical service restart risk).
+```bash
+make apply PROJECT=cobosio/cobos-io
+```
 
-## 📧 Notifications
+Validar todos:
 
-Email notifications are generated using **Google Gemini** for professional, context-aware content and sent via **Resend**.
+```bash
+make validate-all
+```
 
-- ✅ Success emails for completed updates
-- ⚠️ Urgent emails when reboot is required
-- ❌ Error emails when updates fail
+## Proyectos Terraform
 
-## 📄 License
+| Proyecto local | HCP organization | HCP project | Workspace |
+| --- | --- | --- | --- |
+| `cobosio/cobos-io` | `cobosio` | `cobos.io` | `cobos-io-cloudflare-dns` |
+| `voltaflow/getdecant` | `voltaflow` | `getdecant` | `getdecant-cloudflare-dns` |
+| `voltaflow/voltaflow` | `voltaflow` | `voltaflow` | `voltaflow-cloudflare-dns` |
+| `voltaflow/enkiflow` | `voltaflow` | `enkiflow` | `enkiflow-cloudflare-dns` |
 
-Private repository. All rights reserved.
+Cada proyecto tiene un `terraform.tfvars.example`. Copialo a `terraform.tfvars` localmente y llena el inventario real.
+
+`terraform.tfvars` esta ignorado por git para no publicar inventarios privados en este repo.
+
+## Adoptar zonas existentes
+
+Para una zona que ya existe en Cloudflare:
+
+1. Agrega la zona y sus records al `terraform.tfvars` local.
+2. Ejecuta `make init PROJECT=<org>/<project>`.
+3. Importa la zona al recurso del modulo.
+4. Importa cada DNS record existente antes del primer `apply`.
+5. Ejecuta `make plan PROJECT=<org>/<project>` y confirma que no hay recreaciones inesperadas.
+
+Ejemplo conceptual:
+
+```bash
+terraform -chdir=projects/cobosio/cobos-io import \
+  'module.cloudflare_zones.cloudflare_zone.managed["cobos.io"]' \
+  '<cloudflare_zone_id>'
+
+terraform -chdir=projects/cobosio/cobos-io import \
+  'module.cloudflare_zones.cloudflare_dns_record.this["cobos.io/www-cname"]' \
+  '<cloudflare_zone_id>/<dns_record_id>'
+```
+
+## Portfolio
+
+El diagrama base para renderizar en portfolio vive en:
+
+```text
+docs/diagrams/cloudflare-platform.mmd
+```
+
+Tambien esta incluido en `wiki/Portfolio-Diagram.md` para GitHub Wiki.
+
+## GitHub Wiki
+
+La fuente del wiki vive en `wiki/`. Para publicarlo:
+
+```bash
+git clone git@github.com:ErnestoCobos/Infra.wiki.git /tmp/infra-wiki
+rsync -av --delete wiki/ /tmp/infra-wiki/
+git -C /tmp/infra-wiki add .
+git -C /tmp/infra-wiki commit -m "docs: publish infrastructure wiki"
+git -C /tmp/infra-wiki push
+```
+
+## Documentacion oficial usada
+
+- [Terraform install](https://developer.hashicorp.com/terraform/install)
+- [HCP Terraform CLI workflow](https://developer.hashicorp.com/terraform/cli/cloud)
+- [Terraform cloud block](https://developer.hashicorp.com/terraform/language/block/terraform#cloud)
+- [Cloudflare Terraform zones](https://developers.cloudflare.com/api/terraform/resources/zones/)
+- [Cloudflare Terraform DNS records](https://developers.cloudflare.com/api/terraform/resources/dns/subresources/records/)
+- [1Password CLI secret environments](https://developer.1password.com/docs/cli/secrets-environment-variables/)
+
+## Ansible existente
+
+`ansible/` y algunos workflows existentes vienen de la automatizacion previa de servidores. No son parte del nuevo flujo Terraform Cloudflare. No agregues automatizacion remota para Terraform sin una decision explicita.

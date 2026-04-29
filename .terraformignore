@@ -1,0 +1,13 @@
+.git/
+.github/
+.superpowers/
+ansible/
+docs/
+wiki/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+*.tfvars.json
+.env
+.env.*

@@ -1,0 +1,37 @@
+cloudflare_account_id = "REPLACE_WITH_CLOUDFLARE_ACCOUNT_ID"
+
+zones = {
+  "cobos.io" = {
+    # Optional read-only adoption mode before importing the zone resource:
+    # zone_id = "REPLACE_WITH_CLOUDFLARE_ZONE_ID"
+
+    records = {
+      "apex-a" = {
+        name    = "cobos.io"
+        type    = "A"
+        content = "REPLACE_WITH_APEX_IPV4"
+        proxied = false
+      }
+
+      "www-cname" = {
+        name    = "www.cobos.io"
+        type    = "CNAME"
+        content = "REPLACE_WITH_TARGET"
+        proxied = false
+      }
+
+      "mail-mx-1" = {
+        name     = "cobos.io"
+        type     = "MX"
+        content  = "REPLACE_WITH_MAIL_EXCHANGER"
+        priority = 10
+      }
+
+      "spf-txt" = {
+        name    = "cobos.io"
+        type    = "TXT"
+        content = "v=spf1 include:example.com ~all"
+      }
+    }
+  }
+}
