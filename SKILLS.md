@@ -61,7 +61,7 @@ Set each workspace to local execution in HCP Terraform when the workspace is cre
 The wiki source lives in `wiki/`. Publish it to GitHub Wiki by pushing those Markdown files to:
 
 ```bash
-git@github.com:ErnestoCobos/Infra.wiki.git
+git@github.com:ErnestoCobos/Infrastructure.wiki.git
 ```
 
 If GitHub returns `Repository not found`, create the first wiki page from the GitHub web UI while signed in. GitHub only exposes the `.wiki.git` remote after that first page exists.

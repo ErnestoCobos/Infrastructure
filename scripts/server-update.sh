@@ -4,7 +4,7 @@
 
 set -e
 
-REPO="ErnestoCobos/Infra"
+REPO="ErnestoCobos/Infrastructure"
 WORKFLOW="server-updates.yml"
 
 # Colors
@@ -112,7 +112,8 @@ download_logs() {
 
 watch_run() {
     echo -e "${YELLOW}👀 Watching latest run...${NC}"
-    local run_id=$(gh run list --repo "$REPO" --workflow "$WORKFLOW" --limit 1 --json databaseId --jq '.[0].databaseId')
+    local run_id
+    run_id=$(gh run list --repo "$REPO" --workflow "$WORKFLOW" --limit 1 --json databaseId --jq '.[0].databaseId')
     gh run watch "$run_id" --repo "$REPO"
 }
 
