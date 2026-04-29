@@ -54,6 +54,7 @@ tmp/
 temp/
 *.tmp
 .superpowers/
+.playwright-mcp/
 
 # Build outputs
 dist/

@@ -63,3 +63,5 @@ The wiki source lives in `wiki/`. Publish it to GitHub Wiki by pushing those Mar
 ```bash
 git@github.com:ErnestoCobos/Infra.wiki.git
 ```
+
+If GitHub returns `Repository not found`, create the first wiki page from the GitHub web UI while signed in. GitHub only exposes the `.wiki.git` remote after that first page exists.

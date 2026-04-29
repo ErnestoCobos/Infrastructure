@@ -147,6 +147,8 @@ Tambien esta incluido en `wiki/Portfolio-Diagram.md` para GitHub Wiki.
 
 La fuente del wiki vive en `wiki/`. Para publicarlo:
 
+> Nota: GitHub no crea `ErnestoCobos/Infra.wiki.git` hasta guardar la primera pagina desde la UI. Si `git clone` devuelve `Repository not found`, abre <https://github.com/ErnestoCobos/Infra/wiki> con sesion iniciada, crea una pagina temporal `Home`, guardala, y luego ejecuta estos comandos para reemplazarla con la fuente versionada.
+
 ```bash
 git clone git@github.com:ErnestoCobos/Infra.wiki.git /tmp/infra-wiki
 rsync -av --delete wiki/ /tmp/infra-wiki/
